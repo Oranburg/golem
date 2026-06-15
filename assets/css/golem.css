@@ -1,0 +1,85 @@
+/* Golem project components, on the Oranburg design system (site.css + lawj-palette.css). */
+.skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}
+.skip-link:focus{position:fixed;top:0;left:0;width:auto;height:auto;padding:1rem;background:var(--accent-red);color:#fff;z-index:999;text-decoration:none}
+
+/* breadcrumb back to the main site (matches the K subsite) */
+.breadcrumb-bar{background:var(--bg-secondary);border-bottom:1px solid var(--border);padding:var(--space-sm) var(--space-lg)}
+.breadcrumb-list{max-width:var(--max-width);margin:0 auto;display:flex;flex-wrap:wrap;list-style:none;padding:0;gap:0;font-size:.82rem;font-family:var(--font-body);color:var(--muted)}
+.breadcrumb-item{display:flex;align-items:center}
+.breadcrumb-sep{margin:0 var(--space-sm);color:var(--muted)}
+.breadcrumb-item a{color:var(--accent);text-decoration:none}
+.breadcrumb-item a:hover{color:var(--accent-2)}
+.breadcrumb-item [aria-current="page"]{color:var(--text)}
+
+/* content + long-form prose in the accent serif */
+.site-content{max-width:var(--max-width);margin:0 auto;padding:var(--space-xl) var(--space-lg) var(--space-2xl)}
+.site-content h1{font-family:var(--font-headline);font-weight:600;line-height:1.12;margin:.2rem 0 .6rem}
+.lede{font-family:var(--font-accent);font-size:1.2rem;color:var(--text);max-width:64ch;margin:0 0 1.4rem}
+.site-content h2{font-family:var(--font-headline);font-weight:600;font-size:1.5rem;margin:2rem 0 .6rem}
+.site-content h3{font-family:var(--font-headline);font-weight:500;margin:1.4rem 0 .4rem}
+.site-content > p,.site-content > ul,.site-content > ol,.site-content blockquote,.site-content > section p{font-family:var(--font-accent);font-size:1.05rem;line-height:1.66}
+.site-content p{max-width:66ch}
+.site-content img{max-width:100%;height:auto;border-radius:var(--radius-md);border:1px solid var(--border);margin:1rem 0 .3rem}
+.site-content blockquote{border-left:3px solid var(--accent);margin:1rem 0;padding:.1rem 0 .1rem 1rem;color:var(--text)}
+.footnotes{margin-top:2.5rem;border-top:1px solid var(--border);padding-top:1rem;font-size:.9rem;color:var(--muted);font-family:var(--font-body)}
+.footnotes p{font-family:var(--font-body)}
+
+/* landing nav cards */
+.navcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:.5rem 0 2rem}
+.navcard{display:block;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.1rem;text-decoration:none;color:var(--text)}
+.navcard:hover{border-color:var(--accent)}
+.navcard h3{margin:0 0 .35rem;font-family:var(--font-headline);font-weight:600;font-size:1.15rem}
+.navcard p{margin:0;font-size:.88rem;color:var(--muted);font-family:var(--font-body)}
+
+/* diagrams */
+.diagram{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;margin:1.5rem 0}
+.diagram h3{margin:0 0 .5rem;font-family:var(--font-body);font-weight:600;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.diagram .note{margin:.5rem .2rem 0;font-size:.88rem;color:var(--muted);font-family:var(--font-body)}
+.diagram .mermaid{overflow-x:auto}
+
+/* field guide controls + sorter */
+.controls{position:sticky;top:0;background:var(--bg);padding:.8rem 0;z-index:5}
+.ptest{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:.8rem .9rem;margin:0 0 .8rem;font-size:.9rem;font-family:var(--font-body)}
+.ptest-h{color:var(--muted);font-weight:600;font-size:.82rem;margin-bottom:.5rem}
+.ptest label{display:inline-flex;align-items:center;gap:.4rem;margin:0 1rem .4rem 0;cursor:pointer}
+.pcount{display:block;margin-top:.4rem;color:var(--accent);font-style:italic}
+#q{width:100%;padding:.7rem .9rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:1rem}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
+.chip{font-family:var(--font-body);font-weight:600;font-size:.8rem;color:var(--muted);background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-pill);padding:.5rem .8rem;cursor:pointer}
+.chip.on{color:#fff;background:var(--accent);border-color:var(--accent)}
+.valence{font-family:var(--font-headline);font-weight:700;font-size:1.7rem;color:var(--text);margin:2.4rem 0 .2rem;display:flex;flex-direction:column;gap:.15rem}
+.valence small{font-family:var(--font-body);font-weight:400;font-size:.85rem;color:var(--muted);letter-spacing:0;text-transform:none}
+.fg-sec{margin-bottom:1.4rem}
+.crosslink{font-family:var(--font-body);font-size:.85rem;color:var(--muted);background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:.6rem .8rem;margin:0 0 1rem}
+.crosslink a{color:var(--accent)}
+.note.pending{font-family:var(--font-body);font-size:.9rem;color:var(--muted);font-style:italic;padding:.4rem 0}
+.cluster{display:flex;align-items:center;gap:.7rem;margin:1.5rem 0 .9rem;font-family:var(--font-headline);font-weight:600;font-size:1.15rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+.cluster span{font-family:var(--font-body);font-weight:700;font-size:.78rem;color:#fff;background:var(--red-deep);border-radius:var(--radius-pill);width:26px;height:26px;display:inline-grid;place-items:center;flex:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.1rem}
+.card{margin:0;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;display:flex;flex-direction:column}
+.card img{width:100%;height:160px;object-fit:cover;background:#000;border:0;border-bottom:1px solid var(--border);border-radius:0;margin:0}
+.card figcaption{padding:.8rem;display:flex;flex-direction:column;gap:.4rem;font-size:.88rem;font-family:var(--font-body)}
+.card figcaption b{font-weight:700;font-size:.9rem;color:var(--text)}
+.card .desc{font-size:.82rem;line-height:1.45;color:var(--text)}
+.card .analysis{font-size:.82rem;color:var(--muted);border-left:2px solid var(--accent);padding-left:.55rem}
+.card .credit{color:var(--muted);font-size:.75rem;font-style:italic}
+.card .badge{align-self:flex-start;font-weight:600;font-size:.68rem;padding:.25rem .5rem;border-radius:var(--radius-pill)}
+.card .badge.pd{background:rgba(181,225,225,.18);color:var(--teal)}
+.card .badge.perm{background:rgba(233,105,85,.18);color:var(--red-light)}
+.card.match{outline:2px solid var(--accent);outline-offset:-1px}
+
+/* archive */
+ul.archive{columns:2;font-size:.88rem;font-family:var(--font-body)}
+ul.archive a{color:var(--muted)}
+/* IP & services registry table */
+.reg-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-md);margin-top:.8rem}
+.registry{width:100%;border-collapse:collapse;font-family:var(--font-body);font-size:.86rem;min-width:780px}
+.registry th{text-align:left;background:var(--bg-secondary);color:var(--text);font-weight:600;padding:.6rem .7rem;border-bottom:1px solid var(--border);cursor:pointer;white-space:nowrap;position:sticky;top:0}
+.registry th:hover{color:var(--accent)}
+.registry td{padding:.6rem .7rem;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text)}
+.registry tbody tr:hover td{background:var(--bg-soft)}
+.registry .r-name{font-weight:700;min-width:150px}
+.registry .r-cat{display:block;font-weight:400;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.registry .r-ans{font-weight:600}
+.registry tbody tr.match td{background:rgba(109,172,222,.16)}
+@media(max-width:640px){ul.archive{columns:1}}
