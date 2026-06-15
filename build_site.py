@@ -35,12 +35,7 @@ def best_bench(subject):
         ov = len(st & toks(e.get("name","")))
         if ov > score: best, score = e, ov
     return best if score >= 1 else None
-def first_sentences(s, n=2):
-    s = (s or "").replace("—"," ").replace("–","-").strip()
-    parts = re.split(r"(?<=[.!?])\s+", s)
-    return " ".join(parts[:n]).strip()
-
-CLUSTERS = {"C1":"Offensive strike","C2":"Defensive point-defense","C3":"Barriers & area-denial","C4":"Dual-use & decision-support","C5":"Curative & life-saving"}
+CLUSTERS = {"C1":"Offensive strike","C2":"Defensive point-defense","C3":"Barriers, counter-systems & sensing","C4":"Dual-use & decision-support","C5":"Curative & life-saving"}
 def cluster_of(e):
     t = " ".join(e.get("tags", []))
     for k in CLUSTERS:
@@ -163,26 +158,38 @@ def domain_of(e):
     if "saving" in tags or any(k in s for k in SAVING_KEYS): return ("battlefield", "save")
     return ("battlefield", "destroy")
 
+def license_note(e):
+    r = (e.get("rights","") or "").lower()
+    if "public domain" in r: return "public domain"
+    if "creative commons" in r or re.search(r"\bcc[ -]", r): return "Creative Commons"
+    return "academic-use image"
+
+def img_style(e):
+    # default is object-fit:cover, centered (set in CSS); the catalog overrides only
+    # where a center-crop would hide the device. fit:contain letterboxes the whole
+    # silhouette on black; pos sets the focal point (e.g. "top", "30% 40%").
+    s = []
+    if e.get("fit") == "contain": s.append("object-fit:contain")
+    if e.get("pos"): s.append("object-position:%s" % e["pos"])
+    return (' style="%s"' % ";".join(s)) if s else ""
+
 def card_html(e):
-    b = best_bench(e.get("subject",""))
-    fl = classify(e, b)
-    analysis = ""
-    if b:
-        analysis = (first_sentences(b.get("humanDecisionLocus",""),1) + " " + first_sentences(b.get("analogy",""),1)).strip()
-    rights = (e.get("rights","") or "").lower()
-    pd = "public domain" in rights
-    searchblob = html.escape((e.get("subject","")+" "+e.get("description","")+" "+analysis).lower())
+    fl = classify(e, best_bench(e.get("subject","")))
+    desc = e.get("description","")
+    posture = (e.get("posture","") or "").strip()
+    searchblob = html.escape((e.get("subject","")+" "+desc+" "+posture).lower())
+    cap = ['<b>%s</b>' % html.escape(e.get("subject","")),
+           '<span class="desc">%s</span>' % html.escape(desc)]
+    if posture:
+        cap.append('<span class="posture">%s</span>' % html.escape(posture))
+    cap.append('<span class="meta">Image: %s. %s.</span>' % (
+        html.escape(e.get("credit","source on file")), html.escape(license_note(e))))
     return ('<figure class="card" data-s="%s" data-lethal="%d" data-irrev="%d" data-machine="%d" data-gap="%d">'
-      '<img loading="lazy" src="images/%s" alt="%s">'
-      '<figcaption><b>%s</b><span class="desc">%s</span>%s'
-      '<span class="credit">Image: %s</span>'
-      '<span class="badge %s">%s</span></figcaption></figure>') % (
+      '<img loading="lazy" src="images/%s" alt="%s"%s>'
+      '<figcaption>%s</figcaption></figure>') % (
         searchblob, fl["lethal"], fl["irrev"], fl["machine"], fl["gap"],
-        html.escape(e["filename"]), html.escape(e.get("subject","")),
-        html.escape(e.get("subject","")), html.escape(e.get("description","")),
-        ('<span class="analysis">%s</span>'%html.escape(analysis)) if analysis else "",
-        html.escape(e.get("credit","source on file")),
-        "pd" if pd else "perm", "public domain" if pd else "academic use")
+        html.escape(e["filename"]), html.escape(e.get("subject","")), img_style(e),
+        "".join(cap))
 
 def ptest_block(note):
     return ('<div class="ptest"><div class="ptest-h">%s</div>'
@@ -226,7 +233,7 @@ for e in catalog:
 # ---- field guide: the battlefield, life-saving against life-destroying ----
 destroy = [e for v,e in battlefield if v=="destroy"]
 save = [e for v,e in battlefield if v=="save"]
-SUB = {"C1":"Offensive strike","C2":"Defensive point-defense","C3":"Barriers, counter-systems & sensing"}
+SUB = {k: CLUSTERS[k] for k in ("C1","C2","C3")}
 def dcluster(e):
     c = cluster_of(e)
     return c if c in ("C1","C2","C3") else "C2"
@@ -251,22 +258,18 @@ for k in ["C1","C2","C3"]:
     fg.append('</div>')
 fg.append('</section>')
 fg.append('<section class="fg-sec" data-c="save"><h2 class="valence">Life-saving<small>battlefield medicine: built to keep a casualty alive</small></h2>')
-if save:
-    fg.append('<div class="grid" data-c="save">')
-    for e in sorted(save, key=lambda x:x.get("subject","")):
-        fg.append(card_html(e))
-    fg.append('</div>')
-else:
-    fg.append('<p class="note pending">The battlefield-medicine devices (casualty-extraction robots, medical-delivery drones, field ventilators, and nerve-agent auto-injectors) are being added with verified images and sources.</p>')
-fg.append('</section>')
+fg.append('<div class="grid" data-c="save">')
+for e in sorted(save, key=lambda x:x.get("subject","")):
+    fg.append(card_html(e))
+fg.append('</div></section>')
 fg.append(SORTER_JS)
 with open(os.path.join(REPO,"field-guide.html"),"w") as f:
     f.write(page("field-guide.html","Field Guide", "".join(fg),
-        "The battlefield, with the life-saving set against the life-destroying. The same ground, the same autonomy, opposite ends: a rule that forbids AI in lethal or irreversible decisions would ground the autonomous medevac in the same breath as the loitering munition. Apply a principle to see what it catches. The flags are a first-pass classification, open to debate."))
+        "The battlefield, with the life-saving set against the life-destroying. The same ground, the same autonomy, opposite ends: a rule that forbids AI in lethal or irreversible decisions would ground the autonomous medevac in the same breath as the loitering munition. Apply a principle to see what it catches. The flags are set from the sourced research and audited by hand, and they remain open to debate."))
 
 # ---- civilian devices page (off the battlefield) ----
 cv = [crosslink("civilian.html"),
-      '<div class="controls">' + ptest_block("Apply a principle here too. These devices already make irreversible life-and-death decisions, far from any battlefield.") +
+      '<div class="controls">' + ptest_block("Apply a principle here too. Some of these decide life and death; some only run a household. Watch where the same principle catches and where it lets go.") +
       '<input id="q" type="search" placeholder="search devices..." oninput="flt()"></div>',
       '<div class="grid">']
 for e in sorted(civilian, key=lambda x:x.get("subject","")):
@@ -275,7 +278,7 @@ cv.append('</div>')
 cv.append(SORTER_JS)
 with open(os.path.join(REPO,"civilian.html"),"w") as f:
     f.write(page("civilian.html","Civilian Devices", "".join(cv),
-        "Off the battlefield, the same question. A CyberKnife, an implanted defibrillator, an artificial pancreas, a self-driving car, an autonomous surgical robot: machines that already make irreversible life-and-death decisions in hospitals, in cars, and inside the body. This is why the thing cannot be put down; it is already here, and already deciding."))
+        "Off the battlefield, the same question, across a wider range. A CyberKnife, an implanted defibrillator, an artificial pancreas, and an autonomous surgical robot already make irreversible calls in hospitals and inside the body. A self-driving car decides in milliseconds. And a vacuum, a mower, and a thermostat simply run themselves. The line between an autonomous machine that could end a life and one that only does a chore is exactly the line a clean rule has to draw, and the gradient here is the whole difficulty. This is why the thing cannot be put down; it is already here, and already deciding."))
 
 # ---- IP & services registry (intangible systems, no product photo) ----
 REGISTRY = [
@@ -347,7 +350,7 @@ rows.forEach(function(r){b.appendChild(r);});}
 </script>""")
 with open(os.path.join(REPO,"registry.html"),"w") as f:
     f.write(page("registry.html","IP & Services", reg_body,
-        "The intangible golems: the software, algorithms, and services that act without a body to photograph. This is where agency detaches from any object, and where the question of who answers is hardest. Sort by any column, or apply a principle and watch the no-answerable-human column fill. The flags are a first-pass classification, open to debate."))
+        "The intangible golems: the software, algorithms, and services that act without a body to photograph. This is where agency detaches from any object, and where the question of who answers is hardest. Sort by any column, or apply a principle and watch the no-answerable-human column fill. The flags are set from the sourced research and audited by hand, and they remain open to debate."))
 
 # ---- diagrams ----
 D1 = """flowchart TD
@@ -398,62 +401,6 @@ with open(os.path.join(REPO,"index.html"),"w") as f:
 # The raw-source archive page was removed deliberately. The build must never
 # publish the working folder, which contains drafts, notes, and private material.
 
-# ---- styles ----
-CSS = """
-:root{--ink:#e8e4da;--bg:#141210;--panel:#1d1a17;--line:#34302a;--accent:#c2703d;--muted:#a39c8e}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 Georgia,'Iowan Old Style',serif;-webkit-text-size-adjust:100%}
-a{color:var(--accent)}
-header.site{position:sticky;top:0;z-index:10;background:rgba(20,18,16,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:10px 18px}
-.brand{font:700 17px/1 -apple-system,system-ui,sans-serif;color:var(--ink);text-decoration:none;margin-right:6px}
-.topnav{display:flex;flex-wrap:wrap;gap:2px 14px;overflow-x:auto}
-.topnav a{font:500 14px/1 -apple-system,system-ui,sans-serif;color:var(--muted);text-decoration:none;white-space:nowrap;padding:6px 0}
-.topnav a.on,.topnav a:hover{color:var(--ink)}
-main{max-width:760px;margin:0 auto;padding:28px 22px 10px}
-main h1{font-size:34px;line-height:1.12;letter-spacing:-.01em;margin:8px 0 14px}
-.lede{font-size:19px;color:#d9d3c7;max-width:66ch}
-main h2{font-size:25px;margin:38px 0 12px}
-main h3{font-size:19px;margin:26px 0 8px}
-main p{max-width:68ch}
-main img{max-width:100%;height:auto;border-radius:8px;border:1px solid var(--line);margin:14px 0 4px}
-blockquote{border-left:3px solid var(--accent);margin:16px 0;padding:2px 0 2px 18px;color:#d9d3c7}
-.footnotes{margin-top:40px;border-top:1px solid var(--line);padding-top:14px;font-size:14px;color:var(--muted)}
-.footnotes li{margin:8px 0}
-hr{border:0;border-top:1px solid var(--line);margin:28px 0}
-.navcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin:8px 0 30px}
-.navcard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;text-decoration:none;color:var(--ink)}
-.navcard:hover{border-color:var(--accent)}
-.navcard h3{margin:0 0 6px;font:700 18px/1.2 -apple-system,system-ui,sans-serif}
-.navcard p{margin:0;font-size:14px;color:var(--muted)}
-.diagram{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;margin:24px 0}
-.diagram h3{margin:0 0 8px;font:600 13px/1 -apple-system,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.diagram .note{margin:8px 2px 0;font-size:14px;color:var(--muted)}
-.controls{position:sticky;top:54px;background:var(--bg);padding:12px 0;z-index:5}
-.ptest{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 12px;font-size:14px}
-.ptest-h{color:var(--muted);font:600 13px/1.45 -apple-system,system-ui,sans-serif;margin-bottom:8px}
-.ptest label{display:inline-flex;align-items:center;gap:6px;margin:0 16px 6px 0;cursor:pointer}
-.pcount{display:block;margin-top:6px;color:var(--accent);font-style:italic}
-.card.match{outline:2px solid var(--accent);outline-offset:-1px}
-#q{width:100%;padding:11px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:16px Georgia,serif}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.chip{font:600 13px/1 -apple-system,system-ui,sans-serif;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 13px;cursor:pointer}
-.chip.on{color:var(--bg);background:var(--accent);border-color:var(--accent)}
-h2.cluster{display:flex;align-items:center;gap:12px;margin:34px 0 16px;font-size:23px;border-bottom:1px solid var(--line);padding-bottom:8px}
-h2.cluster span{font:700 14px/1 -apple-system,system-ui,sans-serif;color:var(--bg);background:var(--accent);border-radius:999px;width:28px;height:28px;display:inline-grid;place-items:center}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
-.card{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
-.card img{width:100%;height:160px;object-fit:cover;background:#000;border-radius:0;border:0;border-bottom:1px solid var(--line);margin:0}
-figcaption{padding:12px 13px;display:flex;flex-direction:column;gap:6px;font-size:14px}
-figcaption b{font:700 14px/1.25 -apple-system,system-ui,sans-serif}
-.desc{font-size:13px;line-height:1.45}
-.analysis{font-size:13px;color:#d9d3c7;border-left:2px solid var(--accent);padding-left:9px}
-.credit{color:var(--muted);font-size:12px;font-style:italic}
-.badge{align-self:flex-start;font:600 11px/1 -apple-system,system-ui,sans-serif;padding:4px 8px;border-radius:999px}
-.badge.pd{background:#1f3326;color:#9fe0b0}.badge.perm{background:#33231f;color:#e6a37f}
-ul.archive{columns:2;font-size:14px}ul.archive a{color:var(--muted)}
-footer.site{max-width:760px;margin:50px auto 70px;padding:18px 22px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}
-@media(max-width:640px){main h1{font-size:28px}.lede{font-size:17px}ul.archive{columns:1}}
-"""
 GOLEM_CSS = """/* Golem project components, on the Oranburg design system (site.css + lawj-palette.css). */
 .skip-link{position:absolute;left:-999px;top:auto;width:1px;height:1px;overflow:hidden}
 .skip-link:focus{position:fixed;top:0;left:0;width:auto;height:auto;padding:1rem;background:var(--accent-red);color:#fff;z-index:999;text-decoration:none}
@@ -517,11 +464,9 @@ GOLEM_CSS = """/* Golem project components, on the Oranburg design system (site.
 .card figcaption{padding:.8rem;display:flex;flex-direction:column;gap:.4rem;font-size:.88rem;font-family:var(--font-body)}
 .card figcaption b{font-weight:700;font-size:.9rem;color:var(--text)}
 .card .desc{font-size:.82rem;line-height:1.45;color:var(--text)}
-.card .analysis{font-size:.82rem;color:var(--muted);border-left:2px solid var(--accent);padding-left:.55rem}
-.card .credit{color:var(--muted);font-size:.75rem;font-style:italic}
-.card .badge{align-self:flex-start;font-weight:600;font-size:.68rem;padding:.25rem .5rem;border-radius:var(--radius-pill)}
-.card .badge.pd{background:rgba(181,225,225,.18);color:var(--teal)}
-.card .badge.perm{background:rgba(233,105,85,.18);color:var(--red-light)}
+.card .posture{font-size:.78rem;line-height:1.4;color:var(--muted)}
+.card .posture b{color:var(--text);font-weight:600}
+.card .meta{color:var(--muted);font-size:.72rem;line-height:1.35}
 .card.match{outline:2px solid var(--accent);outline-offset:-1px}
 
 /* archive */
