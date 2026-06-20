@@ -19,3 +19,6 @@ Images are tracked in `assets/image-catalog.json` with the credit, rights, and a
 
 ## Status
 The articles are drafts with open verification flags. The current status and software documentation live in the wiki. Nothing here is final; the website serves the current drafts.
+
+## Design system
+This site uses the shared Oranburg design system: the canonical `--og-` tokens, a shared breadcrumb, and a shared footer, maintained at [oranburg.github.io/design-system](https://github.com/Oranburg/oranburg.github.io/tree/main/design-system). Adopted 2026-06-20.
